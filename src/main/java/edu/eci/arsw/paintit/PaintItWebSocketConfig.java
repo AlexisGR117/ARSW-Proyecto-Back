@@ -6,11 +6,11 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
-import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import org.springframework.web.socket.config.annotation.*;
 
 
 @Configuration
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*", allowCredentials = "true")
 @EnableWebSocketMessageBroker
 public class PaintItWebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
