@@ -13,22 +13,22 @@ import org.springframework.web.socket.config.annotation.*;
 
 
 @Configuration
-@CrossOrigin(origins = "https://paintitapp.azurewebsites.net", allowCredentials = "true")
 @EnableWebSocketMessageBroker
-public class PaintItWebSocketConfig implements WebSocketMessageBrokerConfigurer {
-
-    @Override
-    public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/stompendpoint")
-                .setAllowedOrigins("https://paintitapp.azurewebsites.net")
-                .withSockJS();
-    }
+public class PaintItWebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.setPathMatcher(new AntPathMatcher("."));
         config.enableSimpleBroker("/topic");
         config.setApplicationDestinationPrefixes("/app");
+    }
+
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        registry.addEndpoint("/stompendpoint")
+                .setAllowedOrigins("*")
+                .withSockJS();
+
     }
 
 }
