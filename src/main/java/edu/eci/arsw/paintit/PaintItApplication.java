@@ -13,14 +13,4 @@ public class PaintItApplication {
         SpringApplication.run(PaintItApplication.class, args);
     }
 
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**").allowedOrigins("https://paintitapp.azurewebsites.net/").allowedMethods("*").allowedHeaders("*");
-            }
-        };
-    }
-
 }
