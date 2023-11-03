@@ -18,7 +18,6 @@ public class PaintItWebSocketConfig implements WebSocketMessageBrokerConfigurer 
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.setPathMatcher(new AntPathMatcher("."));
         config.enableSimpleBroker("/topic");
         config.setApplicationDestinationPrefixes("/app");
     }
@@ -26,7 +25,6 @@ public class PaintItWebSocketConfig implements WebSocketMessageBrokerConfigurer 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/stompendpoint")
-                .setAllowedOrigins("*")
                 .withSockJS();
 
     }
