@@ -14,7 +14,7 @@ import org.springframework.web.socket.config.annotation.*;
 
 @Configuration
 @EnableWebSocketMessageBroker
-public class PaintItWebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
+public class PaintItWebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
