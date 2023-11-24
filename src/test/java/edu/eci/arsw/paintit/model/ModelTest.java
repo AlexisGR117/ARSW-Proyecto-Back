@@ -110,7 +110,7 @@ class ModelTest {
             fail("Threw a exception");
         }
         try {
-            game.movePlayer(playerName, Board.SIZE + 1, Board.SIZE + 1);
+            game.movePlayer(playerName, Game.SIZE + 1, Game.SIZE + 1);
             fail("Did not throw exception");
         } catch (PaintItException e) {
             assertEquals(PaintItException.OFF_BOARD, e.getMessage());
@@ -133,7 +133,7 @@ class ModelTest {
                     break;
                 }
             }
-            for (int i = 1; i < Board.SIZE - 1; i++) {
+            for (int i = 1; i < Game.SIZE - 1; i++) {
                 game.movePlayer(playerLowerLeft.getName(), i, 0);
             }
         } catch (PaintItException e) {
