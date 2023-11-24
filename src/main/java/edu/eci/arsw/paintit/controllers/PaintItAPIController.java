@@ -1,6 +1,5 @@
 package edu.eci.arsw.paintit.controllers;
 
-import edu.eci.arsw.paintit.model.Game;
 import edu.eci.arsw.paintit.model.PaintItException;
 import edu.eci.arsw.paintit.model.Player;
 import edu.eci.arsw.paintit.services.PaintItServices;
@@ -10,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -51,13 +49,8 @@ public class PaintItAPIController {
 
     @PostMapping
     public ResponseEntity<?> handlerPostGame(Integer gameCode) {
-        try {
-            paintiItServices.addGame(gameCode);
-            return new ResponseEntity<>(HttpStatus.CREATED);
-        } catch (PaintItException e) {
-            Logger.getLogger(PaintItAPIController.class.getName()).log(Level.SEVERE, e.getMessage(), e);
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+        paintiItServices.addGame(gameCode);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @PostMapping(path = "/{gameCode}/players")

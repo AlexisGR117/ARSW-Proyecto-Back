@@ -22,7 +22,7 @@ public class PaintItServices {
         this.paintItPersistence = paintItPersistence;
     }
 
-    public List<Player> getAllJugadores(int idGame) throws PaintItException {
+    public List<Player> getAllJugadores(int idGame) {
         return paintItPersistence.getPlayersByGame(this.idGame);
     }
 

@@ -1,5 +1,6 @@
 package edu.eci.arsw.paintit.model;
 
+import edu.eci.arsw.paintit.controllers.PaintItAPIController;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,12 +8,14 @@ import java.awt.*;
 import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Getter
 @Setter
 public class Game {
 
-    public static final String[] WILDCARDS = {"Freeze", "PaintPump"};
+    protected static final String[] WILDCARDS = {"Freeze", "PaintPump"};
     public static final int SIZE = 15;
     private final Cell[][] cells;
     private int duration;
@@ -152,13 +155,13 @@ public class Game {
     public void timerWildcards() {
         if (!finishedGame) {
             Timer timer = new Timer();
-            TimerTask task = new TimerTask() {
+            TimerTask task =  new TimerTask() {
                 @Override
                 public void run() {
                     try {
                         addRandomWildcard();
                     } catch (ReflectiveOperationException e) {
-                        e.printStackTrace();
+                        Logger.getLogger(PaintItAPIController.class.getName()).log(Level.SEVERE, e.getMessage(), e);
                     }
                     timerWildcards();
                 }
