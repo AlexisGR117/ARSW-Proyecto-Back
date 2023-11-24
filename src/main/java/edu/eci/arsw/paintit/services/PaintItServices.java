@@ -1,5 +1,6 @@
 package edu.eci.arsw.paintit.services;
 
+import edu.eci.arsw.paintit.model.Cell;
 import edu.eci.arsw.paintit.model.Game;
 import edu.eci.arsw.paintit.model.PaintItException;
 import edu.eci.arsw.paintit.model.Player;
@@ -7,7 +8,9 @@ import edu.eci.arsw.paintit.persistence.PaintItPersistence;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class PaintItServices {
@@ -21,7 +24,7 @@ public class PaintItServices {
         return paintItPersistence.getPlayersByGame(this.idGame);
     }
 
-    public Object getAllGames() throws PaintItException {
+    public Map<Integer, Game> getAllGames() throws PaintItException {
         return paintItPersistence.getGames();
     }
 
@@ -47,6 +50,14 @@ public class PaintItServices {
 
     public void restartGame(int idGame) {
         paintItPersistence.restartGame(idGame);
+    }
+
+    public List<Cell> getCellsWithWildcard(int idGame) {
+        return paintItPersistence.getCellsWithWildcard(idGame);
+    }
+
+    public Cell[][] getCells(int idGame) {
+        return paintItPersistence.getCells(idGame);
     }
 
 }

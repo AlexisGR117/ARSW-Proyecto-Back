@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.awt.Color;
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -26,26 +27,34 @@ public class Game {
     private Map<String, Player> players;
     private List<Color> availableColors;
     private List<int[]> availableInitialPositions;
-    private Board board;
     private Random random;
     private Player winner;
     private Player host;
     private boolean finishedGame;
-
+    public static final String[] WILDCARDS = {"Freeze", "PaintPump"};
+    private final Cell[][] cells;
+    public static final int SIZE = 15;
+    private ArrayList<Cell> cellsWithWildcard;
     public Game() {
+        cells = new Cell[SIZE][SIZE];
+        random = new Random();
         initializationGame();
     }
 
     public void initializationGame() {
         duration = 90;
         players = new HashMap<>();
+        cellsWithWildcard = new ArrayList<>();
         availableColors = new ArrayList<>(Arrays.asList(Color.RED, Color.CYAN, Color.ORANGE, Color.BLUE, Color.YELLOW));
-        availableInitialPositions = new ArrayList<>(Arrays.asList(new int[] { 0, 0 }, new int[] { 0, Board.SIZE - 1 }, new int[] { Board.SIZE - 1, 0 }, new int[] { Board.SIZE - 1, Board.SIZE - 1 }));
-        random = new Random();
+        availableInitialPositions = new ArrayList<>(Arrays.asList(new int[] { 0, 0 }, new int[] { 0, SIZE - 1 }, new int[] { SIZE - 1, 0 }, new int[] { SIZE - 1, SIZE - 1 }));
         finishedGame = false;
-        board = new Board();
         winner = null;
         host = null;
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                cells[i][j] = new Cell(i, j);
+            }
+        }
     }
 
     public List<Player> getPlayers() {
@@ -60,15 +69,13 @@ public class Game {
         if (players.size() == 4) throw new PaintItException(PaintItException.FULL_GAME);
         if (player.getName().length() > 20) throw new PaintItException(PaintItException.LONG_NAME);
         if (player.getName().length() < 3) throw new PaintItException(PaintItException.SHORT_NAME);
-        if (host == null) {
-            host = player;
-        }
+        if (host == null) host = player;
         int[] initialPosition = selectAvailableInitialPosition();
         player.setColor(selectAvailableColor());
+        player.getScore().incrementAndGet();
+        Cell cell = cells[initialPosition[0]][initialPosition[1]];
         player.setX(initialPosition[0]);
         player.setY(initialPosition[1]);
-        player.getScore().incrementAndGet();
-        Cell cell = board.getCell(initialPosition[0], initialPosition[1]);
         cell.setPaintedBy(player);
         players.put(player.getName(), player);
     }
@@ -76,17 +83,23 @@ public class Game {
     public void movePlayer(String playerName, int x, int y) throws PaintItException {
         validateMove(playerName, x, y);
         Player player = players.get(playerName);
-        Cell cell = board.getCell(x, y);
-        updateCellAndPlayer(player, x, y, cell);
+        Cell cell = cells[x][y];
+        synchronized (cells[x][y]) {
+            if (cell.isPlayerOnCell()) throw new PaintItException(PaintItException.OCCUPIED_BOX);
+            cell.paint(player);
+            player.setX(x);
+            player.setY(y);
+            Wildcard wildcard = cell.getWildcard();
+            if (wildcard != null) {
+                wildcard.activate(this, player);
+                cell.setWildcard(null);
+                cellsWithWildcard.remove(cell);
+            }
+        }
     }
 
-    private synchronized void updateCellAndPlayer(Player player, int x, int y, Cell cell) {
-        if (cell.getPaintedBy() != null)
-            cell.getPaintedBy().getScore().decrementAndGet();
-        player.setX(x);
-        player.setY(y);
-        player.getScore().incrementAndGet();
-        cell.setPaintedBy(player);
+    public Cell getCell(int x, int y) {
+        return cells[x][y];
     }
 
     private Color selectAvailableColor() {
@@ -103,16 +116,12 @@ public class Game {
         return players.containsKey(name);
     }
 
-    public boolean isInsideBoard(int x, int y) {
-        return 0 <= x && x < Board.SIZE && 0 <= y && y < Board.SIZE;
-    }
-
-    public boolean isPlayerOnCell(Cell cell, int x, int y) {
-        return cell.getPaintedBy() != null && cell.getPaintedBy().getX() == x && cell.getPaintedBy().getY() == y;
-    }
-
     public boolean isInvalidMove(Player player, int x, int y) {
         return Math.abs(player.getX() - x) + Math.abs(player.getY() - y) != 1;
+    }
+
+    public boolean isInsideBoard(int x, int y) {
+        return 0 <= x && x < SIZE && 0 <= y && y < SIZE;
     }
 
     private void validateMove(String playerName, int x, int y) throws PaintItException {
@@ -121,8 +130,7 @@ public class Game {
         if (!isInsideBoard(x, y)) throw new PaintItException(PaintItException.OFF_BOARD);
         Player player = players.get(playerName);
         if (isInvalidMove(player, x, y)) throw new PaintItException(PaintItException.INVALID_MOVE);
-        Cell cell = board.getCell(x, y);
-        if (isPlayerOnCell(cell, x, y)) throw new PaintItException(PaintItException.OCCUPIED_BOX);
+        if (players.get(playerName).isFrozen()) throw new PaintItException(PaintItException.FROZEN_PLAYER);
     }
 
     public Player getWinner() {
@@ -132,13 +140,48 @@ public class Game {
 
     public void initStartGame() {
         Timer timer = new Timer();
-        TimerTask tarea = new TimerTask() {
+        TimerTask task = new TimerTask() {
             @Override
             public void run() {
                 finishedGame = true;
             }
         };
-        timer.schedule(tarea, duration * 1000);
+        timer.schedule(task, duration * 1000);
+        timerWildcards();
+    }
+
+    public void timerWildcards() {
+        if (!finishedGame) {
+            Timer timer = new Timer();
+            TimerTask task = new TimerTask() {
+                @Override
+                public void run()  {
+                try {
+                    String wildcard = WILDCARDS[random.nextInt(WILDCARDS.length)];
+                    Class<?> cls = Class.forName("edu.eci.arsw.paintit.model." + wildcard);
+                    Constructor<?>[] cons = cls.getConstructors();
+                    Cell cell = getRandomCell();
+                    cellsWithWildcard.add(cell);
+                    cell.setWildcard((Wildcard)cons[0].newInstance());
+                } catch (ReflectiveOperationException e) {
+                    e.printStackTrace();
+                }
+                timerWildcards();
+                }
+            };
+            timer.schedule(task, 15000);
+        }
+    }
+
+    public Cell getRandomCell() {
+        int y = random.nextInt(SIZE);
+        int x = random.nextInt(SIZE);
+        for (Player player:players.values()) {
+            if (player.getX() == x && player.getY() == y && cells[x][y].getWildcard() == null){
+                return getRandomCell();
+            }
+        }
+        return cells[x][y];
     }
 
     public void resetGame() {

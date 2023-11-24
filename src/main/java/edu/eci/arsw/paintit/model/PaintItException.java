@@ -13,6 +13,8 @@ public class PaintItException extends Exception {
     public static final String INVALID_MOVE = "Solo se puede mover arriba, abajo, a la derecha o a la izquierda de la casilla actual.";
     public static final String NONE_EXISTENT_PLAYER = "El jugador dado no existe en el juego.";
     public static final String GAME_FINISHED = "El juego ha finalizado.";
+    public static final String FROZEN_PLAYER = "No se puede mover un jugador congelado.";
+    public static final String INVALID_WILDCARD = "No es un comodín valido puede ser: 'Freeze' o 'PaintPump'.";
 
     /**
      * Constructor para objetos de clase PaintItException.

@@ -1,16 +1,21 @@
 package edu.eci.arsw.paintit.controllers;
 
+import edu.eci.arsw.paintit.model.Cell;
 import edu.eci.arsw.paintit.model.Game;
 import edu.eci.arsw.paintit.model.PaintItException;
+import edu.eci.arsw.paintit.model.Player;
 import edu.eci.arsw.paintit.services.PaintItServices;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 public class STOMPMessagesHandler {
@@ -31,10 +36,14 @@ public class STOMPMessagesHandler {
         MovementData.Movement movement = data.getMovement();
         try {
             paintitServices.movePlayer(idGame, player, movement.getX(), movement.getY());
-            msgt.convertAndSend("/topic/updatescore." + idGame, paintitServices.getAllJugadores(idGame));
+            List<Player> players = paintitServices.getAllJugadores(idGame);
+            Cell[][] cells = paintitServices.getCells(idGame);
+            msgt.convertAndSend("/topic/updatescore." + idGame, players);
+            data.setPlayers(players);
+            data.setCells(cells);
             msgt.convertAndSend("/topic/updateboard." + idGame, data);
         } catch (PaintItException e) {
-            if (e.getMessage() == PaintItException.GAME_FINISHED) {
+            if (e.getMessage().equals(PaintItException.GAME_FINISHED)) {
                 msgt.convertAndSend("/topic/gamefinished." + idGame, paintitServices.getGame(idGame).getWinner().getName());
                 paintitServices.restartGame(idGame);
             }
@@ -45,6 +54,12 @@ public class STOMPMessagesHandler {
     public void handleStartTimeEvent(@DestinationVariable int idGame) throws Exception {
         Game game = paintitServices.getGame(idGame);
         game.initStartGame();
+    }
+
+    @Scheduled(fixedRate = 1000)
+    public void getWildcards() throws PaintItException {
+        Map<Integer, Game> games = paintitServices.getAllGames();
+        games.forEach((key, value) -> msgt.convertAndSend("/topic/updatewildcards." + key, paintitServices.getCellsWithWildcard(key)));
     }
 
 }

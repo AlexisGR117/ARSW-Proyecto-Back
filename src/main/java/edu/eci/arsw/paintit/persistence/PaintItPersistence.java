@@ -1,15 +1,12 @@
 package edu.eci.arsw.paintit.persistence;
 
+import edu.eci.arsw.paintit.model.Cell;
 import edu.eci.arsw.paintit.model.Game;
 import edu.eci.arsw.paintit.model.PaintItException;
 import edu.eci.arsw.paintit.model.Player;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class PaintItPersistence {
@@ -55,6 +52,14 @@ public class PaintItPersistence {
 
     public void restartGame(int idGame) {
         games.get(idGame).resetGame();
+    }
+
+    public List<Cell> getCellsWithWildcard(int idGame) {
+        return games.get(idGame).getCellsWithWildcard();
+    }
+
+    public Cell[][] getCells(int idGame) {
+        return games.get(idGame).getCells();
     }
 
 }
