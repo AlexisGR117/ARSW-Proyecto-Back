@@ -1,14 +1,10 @@
 package edu.eci.arsw.paintit.model;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 @Getter
 @Setter
-@EqualsAndHashCode
-@ToString
 public class Cell {
 
     private Player paintedBy;
@@ -20,6 +16,7 @@ public class Cell {
         this.x = x;
         this.y = y;
     }
+
     public boolean isPlayerOnCell() {
         return paintedBy != null && paintedBy.getX() == x && paintedBy.getY() == y;
     }

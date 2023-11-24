@@ -18,7 +18,7 @@ public class PaintItPersistence {
     }
 
     public Map<Integer, Game> getGames() throws PaintItException {
-        Set<Game> allGames = new HashSet<Game>();
+        Set<Game> allGames = new HashSet<>();
         games.forEach((key, value) -> allGames.add(value));
         if (allGames.isEmpty()) {
             throw new PaintItException(PaintItException.NO_GAMES);
@@ -30,7 +30,7 @@ public class PaintItPersistence {
         games.put(idGame, new Game());
     }
 
-    public List<Player> getPlayersByGame(int idGame) throws PaintItException {
+    public List<Player> getPlayersByGame(int idGame) {
         return games.get(idGame).getPlayers();
     }
 
@@ -51,7 +51,7 @@ public class PaintItPersistence {
     }
 
     public void restartGame(int idGame) {
-        games.get(idGame).resetGame();
+        games.get(idGame).initializationGame();
     }
 
     public List<Cell> getCellsWithWildcard(int idGame) {

@@ -1,28 +1,20 @@
 package edu.eci.arsw.paintit.model;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
-import java.awt.Color;
+import java.awt.*;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.TimerTask;
-import java.util.Timer;
+import java.util.*;
 
 @Getter
 @Setter
-@EqualsAndHashCode
-@ToString
 public class Game {
 
+    public static final String[] WILDCARDS = {"Freeze", "PaintPump"};
+    public static final int SIZE = 15;
+    private final Cell[][] cells;
     private int duration;
     private Map<String, Player> players;
     private List<Color> availableColors;
@@ -31,10 +23,8 @@ public class Game {
     private Player winner;
     private Player host;
     private boolean finishedGame;
-    public static final String[] WILDCARDS = {"Freeze", "PaintPump"};
-    private final Cell[][] cells;
-    public static final int SIZE = 15;
     private ArrayList<Cell> cellsWithWildcard;
+
     public Game() {
         cells = new Cell[SIZE][SIZE];
         random = new Random();
@@ -46,7 +36,7 @@ public class Game {
         players = new HashMap<>();
         cellsWithWildcard = new ArrayList<>();
         availableColors = new ArrayList<>(Arrays.asList(Color.RED, Color.CYAN, Color.ORANGE, Color.BLUE, Color.YELLOW));
-        availableInitialPositions = new ArrayList<>(Arrays.asList(new int[] { 0, 0 }, new int[] { 0, SIZE - 1 }, new int[] { SIZE - 1, 0 }, new int[] { SIZE - 1, SIZE - 1 }));
+        availableInitialPositions = new ArrayList<>(Arrays.asList(new int[]{0, 0}, new int[]{0, SIZE - 1}, new int[]{SIZE - 1, 0}, new int[]{SIZE - 1, SIZE - 1}));
         finishedGame = false;
         winner = null;
         host = null;
@@ -83,7 +73,7 @@ public class Game {
     public void movePlayer(String playerName, int x, int y) throws PaintItException {
         validateMove(playerName, x, y);
         Player player = players.get(playerName);
-        Cell cell = cells[x][y];
+        Cell cell = getCell(x, y);
         synchronized (cells[x][y]) {
             if (cell.isPlayerOnCell()) throw new PaintItException(PaintItException.OCCUPIED_BOX);
             cell.paint(player);
@@ -133,9 +123,9 @@ public class Game {
         if (players.get(playerName).isFrozen()) throw new PaintItException(PaintItException.FROZEN_PLAYER);
     }
 
-    public Player getWinner() {
+    public void endGame() {
         winner = players.values().stream().max(Comparator.comparingInt(player -> player.getScore().get())).orElse(null);
-        return winner;
+        finishedGame = true;
     }
 
     public void initStartGame() {
@@ -143,11 +133,20 @@ public class Game {
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
-                finishedGame = true;
+                endGame();
             }
         };
-        timer.schedule(task, duration * 1000);
+        timer.schedule(task, duration * 1000L);
         timerWildcards();
+    }
+
+    public void addRandomWildcard() throws ReflectiveOperationException {
+        String wildcard = WILDCARDS[random.nextInt(WILDCARDS.length)];
+        Class<?> cls = Class.forName("edu.eci.arsw.paintit.model." + wildcard);
+        Constructor<?>[] cons = cls.getConstructors();
+        Cell cell = getRandomCell();
+        cellsWithWildcard.add(cell);
+        cell.setWildcard((Wildcard) cons[0].newInstance());
     }
 
     public void timerWildcards() {
@@ -155,18 +154,13 @@ public class Game {
             Timer timer = new Timer();
             TimerTask task = new TimerTask() {
                 @Override
-                public void run()  {
-                try {
-                    String wildcard = WILDCARDS[random.nextInt(WILDCARDS.length)];
-                    Class<?> cls = Class.forName("edu.eci.arsw.paintit.model." + wildcard);
-                    Constructor<?>[] cons = cls.getConstructors();
-                    Cell cell = getRandomCell();
-                    cellsWithWildcard.add(cell);
-                    cell.setWildcard((Wildcard)cons[0].newInstance());
-                } catch (ReflectiveOperationException e) {
-                    e.printStackTrace();
-                }
-                timerWildcards();
+                public void run() {
+                    try {
+                        addRandomWildcard();
+                    } catch (ReflectiveOperationException e) {
+                        e.printStackTrace();
+                    }
+                    timerWildcards();
                 }
             };
             timer.schedule(task, 15000);
@@ -176,16 +170,11 @@ public class Game {
     public Cell getRandomCell() {
         int y = random.nextInt(SIZE);
         int x = random.nextInt(SIZE);
-        for (Player player:players.values()) {
-            if (player.getX() == x && player.getY() == y && cells[x][y].getWildcard() == null){
+        for (Player player : players.values()) {
+            if (player.getX() == x && player.getY() == y && cells[x][y].getWildcard() == null) {
                 return getRandomCell();
             }
         }
-        return cells[x][y];
+        return getCell(x, y);
     }
-
-    public void resetGame() {
-        initializationGame();
-    }
-
 }

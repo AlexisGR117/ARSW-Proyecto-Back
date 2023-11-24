@@ -1,8 +1,6 @@
 package edu.eci.arsw.paintit.controllers;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+import edu.eci.arsw.paintit.model.Game;
 import edu.eci.arsw.paintit.model.PaintItException;
 import edu.eci.arsw.paintit.model.Player;
 import edu.eci.arsw.paintit.services.PaintItServices;
@@ -10,22 +8,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping(value = "/games")
 public class PaintItAPIController {
 
-    @Autowired
     PaintItServices paintiItServices;
 
-    @Autowired
+
     SimpMessagingTemplate msgt;
+
+    @Autowired
+    public PaintItAPIController(PaintItServices paintiItServices, SimpMessagingTemplate msgt) {
+        this.msgt = msgt;
+        this.paintiItServices = paintiItServices;
+    }
 
     @GetMapping(produces = "application/json")
     public ResponseEntity<?> handlerGetGames() {
@@ -69,7 +71,7 @@ public class PaintItAPIController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
-    
+
     @GetMapping(path = "/{idGame}")
     public ResponseEntity<?> handlerGetGame(@PathVariable("idGame") int idGame) {
         return new ResponseEntity<>(paintiItServices.getGame(idGame), HttpStatus.ACCEPTED);

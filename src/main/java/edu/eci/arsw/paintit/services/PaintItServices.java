@@ -8,17 +8,19 @@ import edu.eci.arsw.paintit.persistence.PaintItPersistence;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @Service
 public class PaintItServices {
 
-    @Autowired
     PaintItPersistence paintItPersistence;
-
     int idGame = 1; // solo para el primer juego
+
+    @Autowired
+    public PaintItServices(PaintItPersistence paintItPersistence) {
+        this.paintItPersistence = paintItPersistence;
+    }
 
     public List<Player> getAllJugadores(int idGame) throws PaintItException {
         return paintItPersistence.getPlayersByGame(this.idGame);
@@ -28,7 +30,7 @@ public class PaintItServices {
         return paintItPersistence.getGames();
     }
 
-    public void addGame(int idGame) throws PaintItException {
+    public void addGame(int idGame) {
         paintItPersistence.addNewGame(idGame);
     }
 
