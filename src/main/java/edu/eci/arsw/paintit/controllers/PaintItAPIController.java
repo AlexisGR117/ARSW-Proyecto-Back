@@ -39,12 +39,7 @@ public class PaintItAPIController {
 
     @GetMapping(path = "/{gameCode}/players")
     public ResponseEntity<?> handlerGetPlayers(@PathVariable("gameCode") int gameCode) {
-        try {
-            return new ResponseEntity<>(paintiItServices.getAllJugadores(gameCode), HttpStatus.ACCEPTED);
-        } catch (PaintItException e) {
-            Logger.getLogger(PaintItAPIController.class.getName()).log(Level.SEVERE, e.getMessage(), e);
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        }
+        return new ResponseEntity<>(paintiItServices.getAllJugadores(gameCode), HttpStatus.ACCEPTED);
     }
 
     @PostMapping
