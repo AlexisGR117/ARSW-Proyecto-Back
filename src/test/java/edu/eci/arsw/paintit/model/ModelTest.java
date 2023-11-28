@@ -15,7 +15,9 @@ class ModelTest {
 
     @BeforeEach
     public void setUp() {
-        game = new Game();
+        int size = 15;
+        int duration = 90;
+        game = new Game(size, duration);
     }
 
     @Test
@@ -56,10 +58,10 @@ class ModelTest {
         assertNull(game.getWinner());
         assertNull(game.getHost());
         Cell[][] cells = game.getCells();
-        assertEquals(Game.SIZE, cells.length);
-        for (int i = 0; i < Game.SIZE; i++) {
-            assertEquals(Game.SIZE, cells[i].length);
-            for (int j = 0; j < Game.SIZE; j++) {
+        assertEquals(game.getSize(), cells.length);
+        for (int i = 0; i < game.getSize(); i++) {
+            assertEquals(game.getSize(), cells[i].length);
+            for (int j = 0; j < game.getSize(); j++) {
                 assertNotNull(cells[i][j]);
                 assertEquals(i, cells[i][j].getX());
                 assertEquals(j, cells[i][j].getY());
@@ -200,8 +202,8 @@ class ModelTest {
 
     @Test
     void active_WildcardFreeze_FreezeOpponents() {
-        int x = Game.SIZE / 2;
-        int y = Game.SIZE / 2;
+        int x = game.getSize() / 2;
+        int y = game.getSize() / 2;
         String playerName = "John";
         Player player = new Player();
         player.setName(playerName);
@@ -310,7 +312,7 @@ class ModelTest {
             fail("Threw a exception");
         }
         try {
-            game.movePlayer(playerName, Game.SIZE + 1, Game.SIZE + 1);
+            game.movePlayer(playerName, game.getSize() + 1, game.getSize() + 1);
             fail("Did not throw exception");
         } catch (PaintItException e) {
             assertEquals(PaintItException.OFF_BOARD, e.getMessage());
@@ -333,7 +335,7 @@ class ModelTest {
                     break;
                 }
             }
-            for (int i = 1; i < Game.SIZE - 1; i++) {
+            for (int i = 1; i < game.getSize() - 1; i++) {
                 game.movePlayer(playerLowerLeft.getName(), i, 0);
             }
         } catch (PaintItException e) {
