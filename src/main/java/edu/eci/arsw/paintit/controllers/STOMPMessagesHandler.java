@@ -5,6 +5,9 @@ import edu.eci.arsw.paintit.model.Game;
 import edu.eci.arsw.paintit.model.PaintItException;
 import edu.eci.arsw.paintit.model.Player;
 import edu.eci.arsw.paintit.services.PaintItServices;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -18,6 +21,7 @@ import java.util.Map;
 @Controller
 public class STOMPMessagesHandler {
 
+    private static final Logger logger = LoggerFactory.getLogger(STOMPMessagesHandler.class.getName());
     PaintItServices paintItServices;
     SimpMessagingTemplate msgt;
     @Autowired
@@ -58,9 +62,16 @@ public class STOMPMessagesHandler {
     }
 
     @Scheduled(fixedRate = 1000)
-    public void getWildcards() throws PaintItException {
-        Map<Integer, Game> games = paintItServices.getAllGames();
-        games.forEach((key, value) -> msgt.convertAndSend("/topic/updatewildcards." + key, paintItServices.getCellsWithWildcard(key)));
+    public void getWildcards() {
+        Map<Integer, Game> games;
+        try {
+            games = paintItServices.getAllGames();
+            games.forEach((key, value) -> msgt.convertAndSend("/topic/updatewildcards." + key, paintItServices.getCellsWithWildcard(key)));
+        } catch (PaintItException e) {
+            if (!e.getMessage().equals(PaintItException.NO_GAMES)) {
+                logger.error(e.getMessage(), e);
+            }
+        }
     }
 
 }

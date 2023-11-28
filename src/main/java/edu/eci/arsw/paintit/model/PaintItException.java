@@ -15,6 +15,8 @@ public class PaintItException extends Exception {
     public static final String GAME_FINISHED = "El juego ha finalizado.";
     public static final String FROZEN_PLAYER = "No se puede mover un jugador congelado.";
     public static final String INVALID_WILDCARD = "No es un comodín valido puede ser: 'Freeze' o 'PaintPump'.";
+    public static final String NO_GAME_CODE = "No hay más códigos de juego disponibles";
+    public static final String STARTED_GAME = "El juego ya ha iniciado.";
 
     /**
      * Constructor para objetos de clase PaintItException.

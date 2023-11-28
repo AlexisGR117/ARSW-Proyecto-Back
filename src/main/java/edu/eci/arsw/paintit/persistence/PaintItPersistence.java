@@ -4,6 +4,9 @@ import edu.eci.arsw.paintit.model.Cell;
 import edu.eci.arsw.paintit.model.Game;
 import edu.eci.arsw.paintit.model.PaintItException;
 import edu.eci.arsw.paintit.model.Player;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -11,10 +14,11 @@ import java.util.*;
 @Service
 public class PaintItPersistence {
 
+     private static final Logger logger = LoggerFactory.getLogger(PaintItPersistence.class);
     private final HashMap<Integer, Game> games = new HashMap<>();
+    private final List<Integer> availableGameCodes = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
 
     public PaintItPersistence() {
-        games.put(1, new Game());
     }
 
     public Map<Integer, Game> getGames() throws PaintItException {
@@ -26,8 +30,15 @@ public class PaintItPersistence {
         return games;
     }
 
-    public void addNewGame(int idGame) {
-        games.put(idGame, new Game());
+    public synchronized Integer addNewGame(Map<String, Integer> gameConfig) throws PaintItException {
+        if (availableGameCodes.isEmpty()) {
+            throw new PaintItException(PaintItException.NO_GAME_CODE);
+        }
+        Integer idGame = availableGameCodes.remove(0);
+        Game game = new Game(gameConfig.get("boardSize"), gameConfig.get("gameTime"));
+        games.put(idGame, game);
+        logger.info("New game created with id: " + idGame);
+        return idGame;
     }
 
     public List<Player> getPlayersByGame(int idGame) {
@@ -50,8 +61,9 @@ public class PaintItPersistence {
         return games.get(idGame).getWinner().getName();
     }
 
-    public void restartGame(int idGame) {
-        games.get(idGame).initializationGame();
+    public synchronized void restartGame(int idGame) {
+        availableGameCodes.add(idGame);
+        games.remove(idGame);
     }
 
     public List<Cell> getCellsWithWildcard(int idGame) {

@@ -8,6 +8,8 @@ import edu.eci.arsw.paintit.persistence.PaintItPersistence;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +17,6 @@ import java.util.Map;
 public class PaintItServices {
 
     PaintItPersistence paintItPersistence;
-    int idGame = 1; // solo para el primer juego
 
     @Autowired
     public PaintItServices(PaintItPersistence paintItPersistence) {
@@ -23,27 +24,27 @@ public class PaintItServices {
     }
 
     public List<Player> getAllJugadores(int idGame) {
-        return paintItPersistence.getPlayersByGame(this.idGame);
+        return paintItPersistence.getPlayersByGame(idGame);
     }
 
     public Map<Integer, Game> getAllGames() throws PaintItException {
         return paintItPersistence.getGames();
     }
 
-    public void addGame(int idGame) {
-        paintItPersistence.addNewGame(idGame);
+    public Integer addGame(Map<String, Integer> gameConfig) throws PaintItException {
+        return paintItPersistence.addNewGame(gameConfig);
     }
 
     public Game getGame(int idGame) {
-        return paintItPersistence.getGame(1);
+        return paintItPersistence.getGame(idGame);
     }
 
     public void movePlayer(int idGame, String playerName, int x, int y) throws PaintItException {
-        paintItPersistence.movePlayer(this.idGame, playerName, x, y);
+        paintItPersistence.movePlayer(idGame, playerName, x, y);
     }
 
     public void addNewPlayerToGame(int idGame, Player player) throws PaintItException {
-        paintItPersistence.addNewPlayerToGame(this.idGame, player);
+        paintItPersistence.addNewPlayerToGame(idGame, player);
     }
 
     public String getWinner(int idGame) {
@@ -60,6 +61,14 @@ public class PaintItServices {
 
     public Cell[][] getCells(int idGame) {
         return paintItPersistence.getCells(idGame);
+    }
+
+    public int[] getBoardSizes() {
+        return Game.BOARD_SIZES;
+    }
+
+    public int[] getGameTimes() {
+        return Game.GAME_TIMES;
     }
 
 }

@@ -15,9 +15,11 @@ import java.util.logging.Logger;
 @Setter
 public class Game {
 
+    private int size;
     protected static final String[] WILDCARDS = {"Freeze", "PaintPump"};
-    public static final int SIZE = 15;
     private final Cell[][] cells;
+    public static final int[] GAME_TIMES = { 30, 60, 120 };
+    public static final int[] BOARD_SIZES = { 15, 20, 25 };
     private int duration;
     private Map<String, Player> players;
     private List<Color> availableColors;
@@ -25,26 +27,28 @@ public class Game {
     private Random random;
     private Player winner;
     private Player host;
-    private boolean finishedGame;
+    private boolean finishedGame, startedGame;
     private ArrayList<Cell> cellsWithWildcard;
 
-    public Game() {
-        cells = new Cell[SIZE][SIZE];
+    public Game(int size, int duration) {
+        cells = new Cell[size][size];
         random = new Random();
-        initializationGame();
+        initializationGame(size, duration);
     }
 
-    public void initializationGame() {
-        duration = 90;
+    public void initializationGame(int size, int duration) {
+        this.duration = duration;
+        this.size = size;
         players = new HashMap<>();
         cellsWithWildcard = new ArrayList<>();
         availableColors = new ArrayList<>(Arrays.asList(Color.RED, Color.CYAN, Color.ORANGE, Color.BLUE, Color.YELLOW));
-        availableInitialPositions = new ArrayList<>(Arrays.asList(new int[]{0, 0}, new int[]{0, SIZE - 1}, new int[]{SIZE - 1, 0}, new int[]{SIZE - 1, SIZE - 1}));
+        availableInitialPositions = new ArrayList<>(Arrays.asList(new int[] { 0, 0 }, new int[] { 0, size - 1 }, new int[] { size - 1, 0 }, new int[] { size - 1, size - 1 }));
+        random = new Random();
         finishedGame = false;
         winner = null;
         host = null;
-        for (int i = 0; i < SIZE; i++) {
-            for (int j = 0; j < SIZE; j++) {
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
                 cells[i][j] = new Cell(i, j);
             }
         }
@@ -58,10 +62,7 @@ public class Game {
     }
 
     public synchronized void addNewPlayerToGame(Player player) throws PaintItException {
-        if (nameExist(player.getName())) throw new PaintItException(PaintItException.EXISTING_PLAYER);
-        if (players.size() == 4) throw new PaintItException(PaintItException.FULL_GAME);
-        if (player.getName().length() > 20) throw new PaintItException(PaintItException.LONG_NAME);
-        if (player.getName().length() < 3) throw new PaintItException(PaintItException.SHORT_NAME);
+        validatePlayer(player);
         if (host == null) host = player;
         int[] initialPosition = selectAvailableInitialPosition();
         player.setColor(selectAvailableColor());
@@ -71,6 +72,14 @@ public class Game {
         player.setY(initialPosition[1]);
         cell.setPaintedBy(player);
         players.put(player.getName(), player);
+    }
+
+    private void validatePlayer(Player player) throws PaintItException {
+        if (nameExist(player.getName())) throw new PaintItException(PaintItException.EXISTING_PLAYER);
+        if (players.size() == 4) throw new PaintItException(PaintItException.FULL_GAME);
+        if (player.getName().length() > 20) throw new PaintItException(PaintItException.LONG_NAME);
+        if (player.getName().length() < 3) throw new PaintItException(PaintItException.SHORT_NAME);
+        if (this.startedGame) throw new PaintItException(PaintItException.STARTED_GAME);
     }
 
     public void movePlayer(String playerName, int x, int y) throws PaintItException {
@@ -114,7 +123,7 @@ public class Game {
     }
 
     public boolean isInsideBoard(int x, int y) {
-        return 0 <= x && x < SIZE && 0 <= y && y < SIZE;
+        return 0 <= x && x < this.size && 0 <= y && y < this.size;
     }
 
     private void validateMove(String playerName, int x, int y) throws PaintItException {
@@ -132,6 +141,7 @@ public class Game {
     }
 
     public void initStartGame() {
+        this.startedGame = true;
         Timer timer = new Timer();
         TimerTask task = new TimerTask() {
             @Override
@@ -155,7 +165,7 @@ public class Game {
     public void timerWildcards() {
         if (!finishedGame) {
             Timer timer = new Timer();
-            TimerTask task =  new TimerTask() {
+            TimerTask task = new TimerTask() {
                 @Override
                 public void run() {
                     try {
@@ -171,8 +181,8 @@ public class Game {
     }
 
     public Cell getRandomCell() {
-        int y = random.nextInt(SIZE);
-        int x = random.nextInt(SIZE);
+        int y = random.nextInt(this.size);
+        int x = random.nextInt(this.size);
         for (Player player : players.values()) {
             if (player.getX() == x && player.getY() == y && cells[x][y].getWildcard() == null) {
                 return getRandomCell();
