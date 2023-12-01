@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class PaintItAPIControllerTest {
+class PaintItAPIControllerTest {
 
     @Autowired
     TestRestTemplate restTemplate;
