@@ -27,7 +27,8 @@ public class Game {
     private Random random;
     private Player winner;
     private Player host;
-    private boolean finishedGame, startedGame;
+    private boolean finishedGame;
+    private boolean startedGame;
     private ArrayList<Cell> cellsWithWildcard;
 
     public Game(int size, int duration) {

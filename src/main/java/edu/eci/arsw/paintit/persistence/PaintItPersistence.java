@@ -19,6 +19,7 @@ public class PaintItPersistence {
     private final List<Integer> availableGameCodes = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
 
     public PaintItPersistence() {
+        //the class does not require any specific initialization logic
     }
 
     public Map<Integer, Game> getGames() throws PaintItException {
@@ -37,7 +38,7 @@ public class PaintItPersistence {
         Integer idGame = availableGameCodes.remove(0);
         Game game = new Game(gameConfig.get("boardSize"), gameConfig.get("gameTime"));
         games.put(idGame, game);
-        logger.info("New game created with id: " + idGame);
+        logger.info("New game created with id: {}", idGame);
         return idGame;
     }
 

@@ -1,7 +1,6 @@
 package edu.eci.arsw.paintit.controllers;
 
 import java.util.Map;
-import java.util.logging.Level;
 
 import edu.eci.arsw.paintit.model.PaintItException;
 import edu.eci.arsw.paintit.model.Player;
