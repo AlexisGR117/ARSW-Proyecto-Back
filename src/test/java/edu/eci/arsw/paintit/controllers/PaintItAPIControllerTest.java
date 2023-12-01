@@ -1,5 +1,6 @@
 package edu.eci.arsw.paintit.controllers;
 
+import edu.eci.arsw.paintit.services.PaintItServices;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -7,11 +8,10 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import edu.eci.arsw.paintit.services.PaintItServices;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import java.util.Map;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class PaintItAPIControllerTest {
@@ -23,7 +23,7 @@ public class PaintItAPIControllerTest {
     PaintItServices paintItServices;
 
     @Test
-    public void shouldNotReturnAGameWithAnInvalidId() {
+    void shouldNotReturnAGameWithAnInvalidId() {
         // Act
         ResponseEntity<String> response = restTemplate.getForEntity("/games/1000", String.class);
 
@@ -33,7 +33,7 @@ public class PaintItAPIControllerTest {
     }
 
     @Test
-    public void shouldReturnBoardSize() {
+    void shouldReturnBoardSize() {
         // Act
         ResponseEntity<int[]> response = restTemplate.getForEntity("/games/boardsizes", int[].class);
 
@@ -42,7 +42,7 @@ public class PaintItAPIControllerTest {
     }
 
     @Test
-    public void shouldReturnGameTime() {
+    void shouldReturnGameTime() {
         // Act
         ResponseEntity<int[]> response = restTemplate.getForEntity("/games/gametimes", int[].class);
 
@@ -51,10 +51,10 @@ public class PaintItAPIControllerTest {
     }
 
     @Test
-    public void shouldCreateANewGame() {
+    void shouldCreateANewGame() {
         // Arrange
         Map<String, Integer> gameConfig = Map.of("boardSize", 15, "gameTime", 15);
-        
+
         // Act
         ResponseEntity<Void> createResponse = restTemplate.postForEntity("/games", gameConfig, Void.class);
 
@@ -63,7 +63,7 @@ public class PaintItAPIControllerTest {
     }
 
     @Test
-    public void shouldReturnNoGameCodeException() {
+    void shouldReturnNoGameCodeException() {
         // Arrange
         Map<String, Integer> gameConfig = Map.of("boardSize", 15, "gameTime", 15);
         for (int i = 1; i <= 10; i++) {
@@ -80,8 +80,8 @@ public class PaintItAPIControllerTest {
         }
     }
 
-    @Test    
-    public void shouldReturnAllGames() {
+    @Test
+    void shouldReturnAllGames() {
         // Arrange
         Map<String, Integer> gameConfig = Map.of("boardSize", 15, "gameTime", 15);
         for (int i = 1; i <= 10; i++) {
@@ -99,7 +99,7 @@ public class PaintItAPIControllerTest {
     }
 
     @Test
-    public void shouldNotReturnAllGames() {
+    void shouldNotReturnAllGames() {
         // Act
         ResponseEntity<String> response = restTemplate.getForEntity("/games", String.class);
 

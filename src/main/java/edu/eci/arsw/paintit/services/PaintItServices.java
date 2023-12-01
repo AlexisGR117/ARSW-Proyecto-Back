@@ -62,11 +62,15 @@ public class PaintItServices {
     }
 
     public int[] getBoardSizes() {
-        return Game.BOARD_SIZES;
+        return Game.BOARD_SIZES.stream()
+                .mapToInt(Integer::intValue)
+                .toArray();
     }
 
     public int[] getGameTimes() {
-        return Game.GAME_TIMES;
+        return Game.GAME_TIMES.stream()
+                .mapToInt(Integer::intValue)
+                .toArray();
     }
 
 }

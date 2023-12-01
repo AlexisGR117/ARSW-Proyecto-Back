@@ -5,7 +5,6 @@ import edu.eci.arsw.paintit.model.Game;
 import edu.eci.arsw.paintit.model.PaintItException;
 import edu.eci.arsw.paintit.model.Player;
 import edu.eci.arsw.paintit.services.PaintItServices;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +23,7 @@ public class STOMPMessagesHandler {
     private static final Logger logger = LoggerFactory.getLogger(STOMPMessagesHandler.class.getName());
     PaintItServices paintItServices;
     SimpMessagingTemplate msgt;
+
     @Autowired
     public STOMPMessagesHandler(SimpMessagingTemplate msgt, PaintItServices paintItServices) {
         this.msgt = msgt;
@@ -31,7 +31,7 @@ public class STOMPMessagesHandler {
     }
 
     @MessageMapping("/newplayer.{idGame}")
-    public void handleNewPlayerEvent(String playerName, @DestinationVariable int idGame) throws PaintItException {
+    public void handleNewPlayerEvent(String playerName, @DestinationVariable int idGame) {
         msgt.convertAndSend("/topic/newplayer." + idGame, paintItServices.getAllJugadores(idGame));
     }
 

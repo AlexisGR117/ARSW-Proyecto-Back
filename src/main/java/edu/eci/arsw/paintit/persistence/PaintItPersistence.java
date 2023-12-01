@@ -4,7 +4,6 @@ import edu.eci.arsw.paintit.model.Cell;
 import edu.eci.arsw.paintit.model.Game;
 import edu.eci.arsw.paintit.model.PaintItException;
 import edu.eci.arsw.paintit.model.Player;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -14,7 +13,7 @@ import java.util.*;
 @Service
 public class PaintItPersistence {
 
-     private static final Logger logger = LoggerFactory.getLogger(PaintItPersistence.class);
+    private static final Logger logger = LoggerFactory.getLogger(PaintItPersistence.class);
     private final HashMap<Integer, Game> games = new HashMap<>();
     private final List<Integer> availableGameCodes = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
 
