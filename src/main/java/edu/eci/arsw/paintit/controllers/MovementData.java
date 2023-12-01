@@ -11,8 +11,6 @@ import java.util.List;
 
 @Getter
 @Setter
-@EqualsAndHashCode
-@ToString
 public class MovementData {
 
     private String playerName;
@@ -23,8 +21,6 @@ public class MovementData {
 
     @Getter
     @Setter
-    @EqualsAndHashCode
-    @ToString
     public static class Movement {
 
         private int x;
