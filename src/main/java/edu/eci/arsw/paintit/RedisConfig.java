@@ -1,6 +1,5 @@
 package edu.eci.arsw.paintit;
 
-import edu.eci.arsw.paintit.model.Game;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
