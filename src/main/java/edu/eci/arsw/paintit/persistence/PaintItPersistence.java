@@ -4,8 +4,10 @@ import edu.eci.arsw.paintit.model.Cell;
 import edu.eci.arsw.paintit.model.Game;
 import edu.eci.arsw.paintit.model.PaintItException;
 import edu.eci.arsw.paintit.model.Player;
+import edu.eci.arsw.paintit.repositories.PaintItRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -13,12 +15,13 @@ import java.util.*;
 @Service
 public class PaintItPersistence {
 
+    private final PaintItRepository paintItRepository;
     private static final Logger logger = LoggerFactory.getLogger(PaintItPersistence.class);
     private final HashMap<Integer, Game> games = new HashMap<>();
-    private final List<Integer> availableGameCodes = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
 
-    public PaintItPersistence() {
-        //the class does not require any specific initialization logic
+    @Autowired
+    public PaintItPersistence(PaintItRepository paintItRepository) {
+        this.paintItRepository = paintItRepository;
     }
 
     public Map<Integer, Game> getGames() throws PaintItException {
@@ -31,14 +34,24 @@ public class PaintItPersistence {
     }
 
     public synchronized Integer addNewGame(Map<String, Integer> gameConfig) throws PaintItException {
+        List<Integer> availableGameCodes = getAvailableGameCodes();
         if (availableGameCodes.isEmpty()) {
             throw new PaintItException(PaintItException.NO_GAME_CODE);
         }
-        Integer idGame = availableGameCodes.remove(0);
+        Integer gameCode = availableGameCodes.remove(0);
         Game game = new Game(gameConfig.get("boardSize"), gameConfig.get("gameTime"));
-        games.put(idGame, game);
-        logger.info("New game created with id: {}", idGame);
-        return idGame;
+        games.put(gameCode, game);
+        logger.info("New game created with id: {}", gameCode);
+        paintItRepository.saveGame(gameCode);
+        return gameCode;
+    }
+
+    public List<Integer> getAvailableGameCodes() {
+        List<Integer> availableGameCodes = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        for (Integer gameCode : paintItRepository.findAll()) {
+            availableGameCodes.remove(gameCode);
+        }
+        return availableGameCodes;
     }
 
     public List<Player> getPlayersByGame(int idGame) {
@@ -62,7 +75,7 @@ public class PaintItPersistence {
     }
 
     public synchronized void restartGame(int idGame) {
-        availableGameCodes.add(idGame);
+        paintItRepository.deleteById(idGame);
         games.remove(idGame);
     }
 
