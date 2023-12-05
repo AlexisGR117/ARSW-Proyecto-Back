@@ -21,7 +21,7 @@ public class PaintItWebSocketConfig implements WebSocketMessageBrokerConfigurer 
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("http://paintitback2.azurewebsites.net/stompendpoint")
+        registry.addEndpoint("/stompendpoint")
                 .setAllowedOrigins("https://paintitapp.azurewebsites.net",
                         "https://paintitfront.azurewebsites.net",
                         "https://paintitgateway.eastus.cloudapp.azure.com",
