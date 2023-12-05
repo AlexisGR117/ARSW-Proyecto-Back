@@ -39,8 +39,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=PaintItBack
 
-  azure:
-    name: Build and Deploy to Azure Web App
+  azure_paintitgame:
+    name: Build and Deploy to Azure Web App - paintitgame
     runs-on: windows-latest
     needs: sonarcloud
     steps:
@@ -57,10 +57,10 @@ jobs:
           name: java-app
           path: '${{ github.workspace }}/target/*.jar'
 
-  deploy:
-    name: Deploy to Azure Web App
+  deploy_paintitgame:
+    name: Deploy to Azure Web App - paintitgame
     runs-on: windows-latest
-    needs: azure
+    needs: azure_paintitgame
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
@@ -77,3 +77,79 @@ jobs:
           slot-name: 'Production'
           package: '*.jar'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_073E7E2BB24542BFBDE90C45DFD3F27F }}
+
+  build_and_deploy_paintitback2:
+    name: Build and deploy JAR app to Azure Web App - paintitback2
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Java version
+        uses: actions/setup-java@v1
+        with:
+          java-version: '17'
+      - name: Build with Maven
+        run: mvn clean install
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v3
+        with:
+          name: java-app
+          path: '${{ github.workspace }}/target/*.jar'
+
+  deploy_paintitback2:
+    name: Deploy to Azure Web App - paintitback2
+    runs-on: windows-latest
+    needs: build_and_deploy_paintitback2
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v3
+        with:
+          name: java-app
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'paintitback2'
+          slot-name: 'Production'
+          package: '*.jar'
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_75F6A40DF31F4BE0B83786DF13B591D9 }}
+
+  build_and_deploy_paintitback:
+    name: Build and deploy JAR app to Azure Web App - paintitback
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Java version
+        uses: actions/setup-java@v1
+        with:
+          java-version: '17'
+      - name: Build with Maven
+        run: mvn clean install
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v3
+        with:
+          name: java-app
+          path: '${{ github.workspace }}/target/*.jar'
+
+  deploy_paintitback:
+    name: Deploy to Azure Web App - paintitback
+    runs-on: ubuntu-latest
+    needs: build_and_deploy_paintitback
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v3
+        with:
+          name: java-app
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'paintitback'
+          slot-name: 'Production'
+          package: '*.jar'
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_1EF44EDB1B1E4330882AFB7BACCDD478 }}
