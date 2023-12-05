@@ -1,6 +1,8 @@
 package edu.eci.arsw.paintit.controllers;
 
+import edu.eci.arsw.paintit.model.Game;
 import edu.eci.arsw.paintit.services.PaintItServices;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +23,11 @@ class PaintItAPIControllerTest {
 
     @Autowired
     PaintItServices paintItServices;
+
+    @BeforeEach
+    public void setUp() {
+        paintItServices.deleteAllGames();
+    }
 
     @Test
     void shouldNotReturnAGameWithAnInvalidId() {
