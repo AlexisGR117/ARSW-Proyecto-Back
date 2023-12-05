@@ -60,13 +60,14 @@ class PaintItAPIControllerTest {
 
         // Assert
         assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        paintItServices.deleteAllGames();
     }
 
     @Test
     void shouldReturnNoGameCodeException() {
         // Arrange
         Map<String, Integer> gameConfig = Map.of("boardSize", 15, "gameTime", 15);
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= 9; i++) {
             restTemplate.postForEntity("/games", gameConfig, Void.class);
         }
 
@@ -75,16 +76,14 @@ class PaintItAPIControllerTest {
 
         // Assert
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        for (int i = 1; i <= 10; i++) {
-            paintItServices.restartGame(i);
-        }
+        paintItServices.deleteAllGames();
     }
 
     @Test
     void shouldReturnAllGames() {
         // Arrange
         Map<String, Integer> gameConfig = Map.of("boardSize", 15, "gameTime", 15);
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= 9; i++) {
             restTemplate.postForEntity("/games", gameConfig, Void.class);
         }
 
@@ -93,9 +92,7 @@ class PaintItAPIControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        for (int i = 1; i <= 10; i++) {
-            paintItServices.restartGame(i);
-        }
+        paintItServices.deleteAllGames();
     }
 
     @Test

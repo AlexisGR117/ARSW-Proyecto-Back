@@ -1,6 +1,5 @@
 package edu.eci.arsw.paintit.repositories;
 
-import edu.eci.arsw.paintit.model.Game;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -29,9 +28,7 @@ public class PaintItRepository {
         assert keys != null;
         for (String key : keys) {
             Integer gameCode = redisTemplate.opsForValue().get(key);
-            if (gameCode != null) {
-                gameCodes.add(gameCode);
-            }
+            if (gameCode != null) gameCodes.add(gameCode);
         }
         return gameCodes;
     }
@@ -45,6 +42,12 @@ public class PaintItRepository {
         redisTemplate.opsForValue().getAndDelete(String.valueOf(gameCode));
     }
 
-
+    public void deleteAll() {
+        Set<String> keys = redisTemplate.keys("*");
+        assert keys != null;
+        for (String key : keys) {
+            redisTemplate.delete(key);
+        }
+    }
 
 }

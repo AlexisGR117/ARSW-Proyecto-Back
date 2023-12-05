@@ -73,4 +73,8 @@ public class PaintItServices {
                 .toArray();
     }
 
+    public void deleteAllGames() {
+        paintItPersistence.deleteAllGames();
+    }
+
 }

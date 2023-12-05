@@ -15,8 +15,8 @@ import java.util.*;
 @Service
 public class PaintItPersistence {
 
-    private final PaintItRepository paintItRepository;
     private static final Logger logger = LoggerFactory.getLogger(PaintItPersistence.class);
+    private final PaintItRepository paintItRepository;
     private final HashMap<Integer, Game> games = new HashMap<>();
 
     @Autowired
@@ -47,7 +47,7 @@ public class PaintItPersistence {
     }
 
     public List<Integer> getAvailableGameCodes() {
-        List<Integer> availableGameCodes = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+        List<Integer> availableGameCodes = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9));
         for (Integer gameCode : paintItRepository.findAll()) {
             availableGameCodes.remove(gameCode);
         }
@@ -85,6 +85,11 @@ public class PaintItPersistence {
 
     public Cell[][] getCells(int idGame) {
         return games.get(idGame).getCells();
+    }
+
+    public void deleteAllGames() {
+        paintItRepository.deleteAll();
+        games.clear();
     }
 
 }
