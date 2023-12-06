@@ -120,7 +120,7 @@ jobs:
   PaintItBack2Build:
     name: Build and deploy to Azure Web App - paintitback2
     runs-on: windows-latest
-    needs: PaintItGameDeploy
+    needs: PaintItBackDeploy
     steps:
       - uses: actions/checkout@v4
       - name: Set up Java version
@@ -138,7 +138,7 @@ jobs:
   PaintItBack2Deploy:
     name: Deploy to Azure Web App - paintitback2
     runs-on: windows-latest
-    needs: PaintItBackBuild
+    needs: PaintItBack2Build
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
