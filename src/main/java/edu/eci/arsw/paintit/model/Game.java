@@ -5,24 +5,23 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.awt.*;
+import java.io.Serializable;
 import java.lang.reflect.Constructor;
-import java.security.SecureRandom;
 import java.util.List;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static java.util.Arrays.asList;
-
 @Getter
 @Setter
-public class Game {
+public class Game implements Serializable {
 
-    public static final List<Integer> GAME_TIMES = List.of(30, 60, 120);
-    public static final List<Integer> BOARD_SIZES = List.of(15, 20, 25);
+    private int size;
+    private int id;
     protected static final String[] WILDCARDS = {"Freeze", "PaintPump"};
     private final Cell[][] cells;
-    private int size;
+    public static final int[] GAME_TIMES = { 30, 60, 120 };
+    public static final int[] BOARD_SIZES = { 15, 20, 25 };
     private int duration;
     private Map<String, Player> players;
     private List<Color> availableColors;
@@ -30,14 +29,14 @@ public class Game {
     private Random random;
     private Player winner;
     private Player host;
-    private boolean finishedGame;
-    private boolean startedGame;
+    private boolean finishedGame, startedGame;
     private ArrayList<Cell> cellsWithWildcard;
 
-    public Game(int size, int duration) {
+    public Game(int size, int duration, int id) {
         cells = new Cell[size][size];
-        random = new SecureRandom();
+        random = new Random();
         initializationGame(size, duration);
+        this.id = id;
     }
 
     public void initializationGame(int size, int duration) {
@@ -45,8 +44,9 @@ public class Game {
         this.size = size;
         players = new HashMap<>();
         cellsWithWildcard = new ArrayList<>();
-        availableColors = new ArrayList<>(asList(Color.RED, Color.CYAN, Color.ORANGE, Color.BLUE, Color.YELLOW));
-        availableInitialPositions = new ArrayList<>(asList(new int[]{0, 0}, new int[]{0, size - 1}, new int[]{size - 1, 0}, new int[]{size - 1, size - 1}));
+        availableColors = new ArrayList<>(Arrays.asList(Color.RED, Color.CYAN, Color.ORANGE, Color.BLUE, Color.YELLOW));
+        availableInitialPositions = new ArrayList<>(Arrays.asList(new int[] { 0, 0 }, new int[] { 0, size - 1 }, new int[] { size - 1, 0 }, new int[] { size - 1, size - 1 }));
+        random = new Random();
         finishedGame = false;
         winner = null;
         host = null;

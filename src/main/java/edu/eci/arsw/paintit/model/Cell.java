@@ -3,9 +3,11 @@ package edu.eci.arsw.paintit.model;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
-public class Cell {
+public class Cell implements Serializable {
 
     private Player paintedBy;
     private int x;

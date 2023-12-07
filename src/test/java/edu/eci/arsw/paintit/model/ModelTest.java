@@ -17,7 +17,8 @@ class ModelTest {
     public void setUp() {
         int size = 15;
         int duration = 90;
-        game = new Game(size, duration);
+        int id = 1;
+        game = new Game(size, duration, id);
     }
 
     @Test

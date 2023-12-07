@@ -4,77 +4,113 @@ import edu.eci.arsw.paintit.model.Cell;
 import edu.eci.arsw.paintit.model.Game;
 import edu.eci.arsw.paintit.model.PaintItException;
 import edu.eci.arsw.paintit.model.Player;
-import edu.eci.arsw.paintit.persistence.PaintItPersistence;
+import edu.eci.arsw.paintit.repositories.PaintItRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class PaintItServices {
 
-    PaintItPersistence paintItPersistence;
+    PaintItRepository paintItRepository;
+
+    private static final Logger logger = LoggerFactory.getLogger(PaintItServices.class);
 
     @Autowired
-    public PaintItServices(PaintItPersistence paintItPersistence) {
-        this.paintItPersistence = paintItPersistence;
+    public PaintItServices(PaintItRepository paintItRepository) {
+        this.paintItRepository = paintItRepository;
     }
 
     public List<Player> getAllJugadores(int idGame) {
-        return paintItPersistence.getPlayersByGame(idGame);
+        Game game = getGame(idGame);
+        if (game != null) return game.getPlayers();
+        return Collections.emptyList();
     }
 
     public Map<Integer, Game> getAllGames() throws PaintItException {
-        return paintItPersistence.getGames();
+        Map<Integer, Game> games = new HashMap<>();
+        for (Game game : paintItRepository.findAll()) {
+            games.put(game.getId(), game);
+        }
+        if (games.isEmpty()) {
+            throw new PaintItException(PaintItException.NO_GAMES);
+        }
+        return games;
     }
 
-    public Integer addGame(Map<String, Integer> gameConfig) throws PaintItException {
-        return paintItPersistence.addNewGame(gameConfig);
+    public synchronized Integer addGame(Map<String, Integer> gameConfig) throws PaintItException {
+        List<Integer> availableGameCodes = getAvailableGameCodes();
+        if (availableGameCodes.isEmpty()) {
+            throw new PaintItException(PaintItException.NO_GAME_CODE);
+        }
+        Integer idGame = availableGameCodes.remove(0);
+        Game game = new Game(gameConfig.get("boardSize"), gameConfig.get("gameTime"), idGame);
+        paintItRepository.saveGame(game);
+        logger.info("New game created with id: " + idGame);
+        return idGame;
     }
+
+    public List<Integer> getAvailableGameCodes() {
+        List<Integer> availableGameCodes = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9));
+        for (Game game : paintItRepository.findAll()) {
+            availableGameCodes.remove((Integer) game.getId());
+        }
+        return availableGameCodes;
+    }
+
 
     public Game getGame(int idGame) {
-        return paintItPersistence.getGame(idGame);
+        Optional<Game> optionalGame = paintItRepository.findById(idGame);
+        return optionalGame.orElse(null);
     }
 
     public void movePlayer(int idGame, String playerName, int x, int y) throws PaintItException {
-        paintItPersistence.movePlayer(idGame, playerName, x, y);
+        Game game = getGame(idGame);
+        if (game != null) game.movePlayer(playerName, x, y);
+        paintItRepository.saveGame(game);
     }
 
     public void addNewPlayerToGame(int idGame, Player player) throws PaintItException {
-        paintItPersistence.addNewPlayerToGame(idGame, player);
+        Game game = getGame(idGame);
+        if (game != null) game.addNewPlayerToGame(player);
+        paintItRepository.saveGame(game);
     }
 
     public String getWinner(int idGame) {
-        return paintItPersistence.getWinnerGame(idGame);
+        Game game = getGame(idGame);
+        if (game != null) return game.getWinner().getName();
+        return "";
     }
 
     public void restartGame(int idGame) {
-        paintItPersistence.restartGame(idGame);
+        paintItRepository.deleteById(idGame);
     }
 
     public List<Cell> getCellsWithWildcard(int idGame) {
-        return paintItPersistence.getCellsWithWildcard(idGame);
+        Game game = getGame(idGame);
+        if (game != null) return game.getCellsWithWildcard();
+        return Collections.emptyList();
     }
 
     public Cell[][] getCells(int idGame) {
-        return paintItPersistence.getCells(idGame);
+        Game game = getGame(idGame);
+        if (game != null) return game.getCells();
+        return new Cell[0][0];
     }
 
     public int[] getBoardSizes() {
-        return Game.BOARD_SIZES.stream()
-                .mapToInt(Integer::intValue)
-                .toArray();
+        return Game.BOARD_SIZES;
     }
 
     public int[] getGameTimes() {
-        return Game.GAME_TIMES.stream()
-                .mapToInt(Integer::intValue)
-                .toArray();
+        return Game.GAME_TIMES;
     }
 
     public void deleteAllGames() {
-        paintItPersistence.deleteAllGames();
+        paintItRepository.deleteAll();
     }
 
 }

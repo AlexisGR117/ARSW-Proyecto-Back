@@ -5,12 +5,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.awt.*;
+import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Getter
 @Setter
 @JsonSerialize(using = PlayerSerializer.class)
-public class Player {
+public class Player implements Serializable {
 
     private final AtomicInteger score = new AtomicInteger(0);
     private String name;

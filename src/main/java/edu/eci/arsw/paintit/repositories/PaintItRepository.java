@@ -1,5 +1,6 @@
 package edu.eci.arsw.paintit.repositories;
 
+import edu.eci.arsw.paintit.model.Game;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
@@ -11,35 +12,38 @@ import java.util.Set;
 
 @Repository
 public class PaintItRepository {
-    private final RedisTemplate<String, Integer> redisTemplate;
+
+    private final RedisTemplate<String, Game> redisTemplate;
 
     @Autowired
-    public PaintItRepository(RedisTemplate<String, Integer> redisTemplate) {
+    public PaintItRepository(RedisTemplate<String, Game> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
-    public void saveGame(int gameCode) {
-        redisTemplate.opsForValue().set(String.valueOf(gameCode), gameCode);
+    public void saveGame(Game game) {
+        redisTemplate.opsForValue().set(String.valueOf(game.getId()), game);
     }
 
-    public Iterable<Integer> findAll() {
+    public Iterable<Game> findAll() {
         Set<String> keys = redisTemplate.keys("*");
-        List<Integer> gameCodes = new ArrayList<>();
+        List<Game> games = new ArrayList<>();
         assert keys != null;
         for (String key : keys) {
-            Integer gameCode = redisTemplate.opsForValue().get(key);
-            if (gameCode != null) gameCodes.add(gameCode);
+            Game game = redisTemplate.opsForValue().get(key);
+            if (game != null) {
+                games.add(game);
+            }
         }
-        return gameCodes;
+        return games;
     }
 
-    public Optional<Integer> findById(int gameCode) {
-        Integer gameCodeFound = redisTemplate.opsForValue().get(String.valueOf(gameCode));
-        return Optional.ofNullable(gameCodeFound);
+    public Optional<Game> findById(int id) {
+        Game game = redisTemplate.opsForValue().get(String.valueOf(id));
+        return Optional.ofNullable(game);
     }
 
-    public void deleteById(int gameCode) {
-        redisTemplate.opsForValue().getAndDelete(String.valueOf(gameCode));
+    public void deleteById(int id) {
+        redisTemplate.opsForValue().getAndDelete(String.valueOf(id));
     }
 
     public void deleteAll() {
