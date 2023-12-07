@@ -49,7 +49,7 @@ public class PaintItServices {
         Integer idGame = availableGameCodes.remove(0);
         Game game = new Game(gameConfig.get("boardSize"), gameConfig.get("gameTime"), idGame);
         paintItRepository.saveGame(game);
-        logger.info("New game created with id: " + idGame);
+        logger.info("New game created with id: {}", idGame);
         return idGame;
     }
 
@@ -102,11 +102,15 @@ public class PaintItServices {
     }
 
     public int[] getBoardSizes() {
-        return Game.BOARD_SIZES;
+        return Game.BOARD_SIZES.stream()
+                .mapToInt(Integer::intValue)
+                .toArray();
     }
 
-    public int[] getGameTimes() {
-        return Game.GAME_TIMES;
+    public double[] getGameTimes() {
+        return Game.GAME_TIMES.stream()
+                .mapToDouble(Double::intValue)
+                .toArray();
     }
 
     public void deleteAllGames() {

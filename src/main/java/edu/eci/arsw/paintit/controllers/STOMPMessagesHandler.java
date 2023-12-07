@@ -47,6 +47,7 @@ public class STOMPMessagesHandler {
             data.setPlayers(players);
             data.setCells(cells);
             msgt.convertAndSend("/topic/updateboard." + idGame, data);
+            msgt.convertAndSend("/topic/updatewildcards." + idGame, paintItServices.getCellsWithWildcard(idGame));
         } catch (PaintItException e) {
             if (e.getMessage().equals(PaintItException.GAME_FINISHED)) {
                 msgt.convertAndSend("/topic/gamefinished." + idGame, paintItServices.getGame(idGame).getWinner().getName());
@@ -58,20 +59,6 @@ public class STOMPMessagesHandler {
     @MessageMapping("/startTime.{idGame}")
     public void handleStartTimeEvent(@DestinationVariable int idGame) {
         Game game = paintItServices.getGame(idGame);
-        game.initStartGame();
+        game.setStartedGame(true);
     }
-
-    @Scheduled(fixedRate = 1000)
-    public void getWildcards() {
-        Map<Integer, Game> games;
-        try {
-            games = paintItServices.getAllGames();
-            games.forEach((key, value) -> msgt.convertAndSend("/topic/updatewildcards." + key, paintItServices.getCellsWithWildcard(key)));
-        } catch (PaintItException e) {
-            if (!e.getMessage().equals(PaintItException.NO_GAMES)) {
-                logger.error(e.getMessage(), e);
-            }
-        }
-    }
-
 }

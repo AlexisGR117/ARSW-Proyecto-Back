@@ -87,8 +87,7 @@ public class PaintItAPIController {
     }
 
     @GetMapping(path = "/gametimes")
-    public ResponseEntity<int[]> handlerGetGameTimes() {
+    public ResponseEntity<double[]> handlerGetGameTimes() {
         return ResponseEntity.ok(paintiItServices.getGameTimes());
     }
-
 }

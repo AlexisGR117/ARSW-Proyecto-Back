@@ -13,16 +13,7 @@ public class Freeze extends Wildcard {
         for (Player playerGame : game.getPlayers()) {
             if (player != playerGame) playerGame.freeze();
         }
-        Timer timer = new Timer();
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                for (Player playerGame : game.getPlayers()) {
-                    if (player != playerGame) playerGame.unfreeze();
-                }
-            }
-        };
-        timer.schedule(task, 5000);
+        game.setRemainingFrozenMoves(15);
     }
 
     @Override

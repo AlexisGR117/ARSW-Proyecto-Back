@@ -1,52 +1,55 @@
 package edu.eci.arsw.paintit.model;
 
-import edu.eci.arsw.paintit.controllers.PaintItAPIController;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.awt.*;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import static java.util.Arrays.asList;
 
 @Getter
 @Setter
 public class Game implements Serializable {
 
+    public static final List<Double> GAME_TIMES = List.of(1.0, 1.5, 2.0);
+    public static final List<Integer> BOARD_SIZES = List.of(15, 20, 25);
+    public static final List<String> WILDCARDS = List.of("Freeze", "PaintPump");
+    private final Cell[][] cells;
     private int size;
     private int id;
-    protected static final String[] WILDCARDS = {"Freeze", "PaintPump"};
-    private final Cell[][] cells;
-    public static final int[] GAME_TIMES = { 30, 60, 120 };
-    public static final int[] BOARD_SIZES = { 15, 20, 25 };
-    private int duration;
+    private float duration;
     private Map<String, Player> players;
     private List<Color> availableColors;
     private List<int[]> availableInitialPositions;
     private Random random;
     private Player winner;
     private Player host;
-    private boolean finishedGame, startedGame;
+    private boolean finishedGame;
+    private boolean startedGame;
     private ArrayList<Cell> cellsWithWildcard;
+    private int remainingMoves;
+    private int remainingFrozenMoves;
 
-    public Game(int size, int duration, int id) {
+    public Game(int size, float duration, int id) {
         cells = new Cell[size][size];
-        random = new Random();
-        initializationGame(size, duration);
-        this.id = id;
+        random = new SecureRandom();
+        initializationGame(size, duration, id);
     }
 
-    public void initializationGame(int size, int duration) {
+    public void initializationGame(int size, float duration, int id) {
         this.duration = duration;
         this.size = size;
+        this.id = id;
+        remainingMoves = (int) (duration * size * size);
         players = new HashMap<>();
         cellsWithWildcard = new ArrayList<>();
-        availableColors = new ArrayList<>(Arrays.asList(Color.RED, Color.CYAN, Color.ORANGE, Color.BLUE, Color.YELLOW));
-        availableInitialPositions = new ArrayList<>(Arrays.asList(new int[] { 0, 0 }, new int[] { 0, size - 1 }, new int[] { size - 1, 0 }, new int[] { size - 1, size - 1 }));
-        random = new Random();
+        availableColors = new ArrayList<>(asList(Color.RED, Color.CYAN, Color.ORANGE, Color.BLUE, Color.YELLOW));
+        availableInitialPositions = new ArrayList<>(asList(new int[]{0, 0}, new int[]{0, size - 1}, new int[]{size - 1, 0}, new int[]{size - 1, size - 1}));
         finishedGame = false;
         winner = null;
         host = null;
@@ -87,6 +90,7 @@ public class Game implements Serializable {
 
     public void movePlayer(String playerName, int x, int y) throws PaintItException {
         validateMove(playerName, x, y);
+        decrementRemainingMoves();
         Player player = players.get(playerName);
         Cell cell = getCell(x, y);
         synchronized (cells[x][y]) {
@@ -100,6 +104,17 @@ public class Game implements Serializable {
                 cell.setWildcard(null);
                 cellsWithWildcard.remove(cell);
             }
+        }
+    }
+
+    public synchronized void decrementRemainingMoves() throws PaintItException {
+        remainingMoves--;
+        if (remainingMoves % 150 == 0) addRandomWildcard();
+        if (remainingMoves == 0) endGame();
+        if (remainingFrozenMoves > 0 && --remainingFrozenMoves <= 0) {
+            players.forEach((key, value) -> {
+                if (value.isFrozen()) value.unfreeze();
+            });
         }
     }
 
@@ -143,44 +158,18 @@ public class Game implements Serializable {
         finishedGame = true;
     }
 
-    public void initStartGame() {
-        this.startedGame = true;
-        Timer timer = new Timer();
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                endGame();
-            }
-        };
-        timer.schedule(task, duration * 1000L);
-        timerWildcards();
-    }
-
-    public void addRandomWildcard() throws ReflectiveOperationException {
-        String wildcard = WILDCARDS[random.nextInt(WILDCARDS.length)];
-        Class<?> cls = Class.forName("edu.eci.arsw.paintit.model." + wildcard);
-        Constructor<?>[] cons = cls.getConstructors();
-        Cell cell = getRandomCell();
-        cellsWithWildcard.add(cell);
-        cell.setWildcard((Wildcard) cons[0].newInstance());
-    }
-
-    public void timerWildcards() {
-        if (!finishedGame) {
-            Timer timer = new Timer();
-            TimerTask task = new TimerTask() {
-                @Override
-                public void run() {
-                    try {
-                        addRandomWildcard();
-                    } catch (ReflectiveOperationException e) {
-                        Logger.getLogger(PaintItAPIController.class.getName()).log(Level.SEVERE, e.getMessage(), e);
-                    }
-                    timerWildcards();
-                }
-            };
-            timer.schedule(task, 15000);
+    public void addRandomWildcard() throws PaintItException {
+        try {
+            String wildcard = WILDCARDS.get(random.nextInt(WILDCARDS.size()));
+            Class<?> cls = Class.forName("edu.eci.arsw.paintit.model." + wildcard);
+            Constructor<?>[] cons = cls.getConstructors();
+            Cell cell = getRandomCell();
+            cellsWithWildcard.add(cell);
+            cell.setWildcard((Wildcard) cons[0].newInstance());
+        } catch (ReflectiveOperationException ignored) {
+            throw new PaintItException(PaintItException.INVALID_WILDCARD);
         }
+
     }
 
     public Cell getRandomCell() {

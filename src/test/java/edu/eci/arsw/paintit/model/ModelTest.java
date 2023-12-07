@@ -15,8 +15,8 @@ class ModelTest {
 
     @BeforeEach
     public void setUp() {
-        int size = 15;
-        int duration = 90;
+        int size = 10;
+        int duration = 1;
         int id = 1;
         game = new Game(size, duration, id);
     }
@@ -133,7 +133,7 @@ class ModelTest {
     void addRandomWildcard_AddsWildcard() {
         try {
             game.addRandomWildcard();
-        } catch (ReflectiveOperationException e) {
+        } catch (PaintItException e) {
             fail("Threw a exception");
         }
         Cell[][] cells = game.getCells();
@@ -172,7 +172,7 @@ class ModelTest {
     }
 
     @Test
-    void active_WildcardPaintPump_PaintCells() {
+    void activate_WildcardPaintPump_PaintCells() {
         String playerName = "John";
         Player player = new Player();
         player.setName(playerName);
@@ -202,7 +202,7 @@ class ModelTest {
     }
 
     @Test
-    void active_WildcardFreeze_FreezeOpponents() {
+    void activate_WildcardFreeze_FreezeOpponents() {
         int x = game.getSize() / 2;
         int y = game.getSize() / 2;
         String playerName = "John";
@@ -219,6 +219,20 @@ class ModelTest {
         cellWithWildcard.getWildcard().activate(game, player);
         for (Player playerGame : game.getPlayers()) {
             if (player != playerGame) assertTrue(playerGame.isFrozen());
+        }
+        int initialX = player.getX();
+        int initialY = player.getY();
+        int newX = initialX == 0 ? initialX + 1 : initialX - 1;
+        for (int i = 0; i < 15; i++) {
+            try {
+                if (player.getX() == initialX) game.movePlayer(playerName, newX, initialY);
+                else game.movePlayer(playerName, initialX, initialY);
+            } catch (PaintItException e) {
+                fail("Threw a exception");
+            }
+        }
+        for (Player playerGame : game.getPlayers()) {
+            if (player != playerGame) assertFalse(playerGame.isFrozen());
         }
     }
 
@@ -337,13 +351,15 @@ class ModelTest {
                 }
             }
             for (int i = 1; i < game.getSize() - 1; i++) {
+                assert playerLowerLeft != null;
                 game.movePlayer(playerLowerLeft.getName(), i, 0);
             }
         } catch (PaintItException e) {
             fail("Threw a exception");
         }
         try {
-            game.movePlayer(playerLowerLeft.getName(), 14, 0);
+            assert playerLowerLeft != null;
+            game.movePlayer(playerLowerLeft.getName(), 9, 0);
             fail("Did not throw exception");
         } catch (PaintItException e) {
             assertEquals(PaintItException.OCCUPIED_BOX, e.getMessage());
@@ -393,7 +409,7 @@ class ModelTest {
     }
 
     @Test
-    void endGame_FinishedToTrueAndWinner() {
+    void decrementRemainingMoves_EndGameWhenMovesReachZero() {
         String playerName = "John";
         Player player = new Player();
         player.setName(playerName);
@@ -410,6 +426,7 @@ class ModelTest {
         } catch (PaintItException e) {
             fail("Threw a exception");
         }
+        game.setRemainingMoves(1);
         int initialX = game.getPlayers().get(0).getX();
         int initialY = game.getPlayers().get(0).getY();
         int newX = initialX == 0 ? initialX + 1 : initialX - 1;
@@ -418,9 +435,23 @@ class ModelTest {
         } catch (PaintItException e) {
             fail("Threw a exception");
         }
-        game.endGame();
+        assertEquals(0, game.getRemainingMoves());
         assertTrue(game.isFinishedGame());
-        assertEquals(player, game.getWinner());
+        assertNotNull(game.getWinner());
+    }
+
+    @Test
+    void addNewPlayer_StartedGame_ThrowsException() {
+        game.setStartedGame(true);
+        String playerName = "John";
+        Player player = new Player();
+        player.setName(playerName);
+        try {
+            game.addNewPlayerToGame(player);
+            fail("Did not throw exception");
+        } catch (PaintItException e) {
+            assertEquals(PaintItException.STARTED_GAME, e.getMessage());
+        }
     }
 
 }
