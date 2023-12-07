@@ -12,18 +12,13 @@ import java.util.List;
 public class MovementData {
 
     private String playerName;
-    private Movement movement;
     private Cell[][] cells;
     private List<Player> players;
     private String wildcard;
-
-    @Getter
-    @Setter
-    public static class Movement {
-
-        private int x;
-        private int y;
-
-    }
+    private List<Cell> cellsWithWildcards;
+    private int remainingMoves;
+    private int remainingFrozenMoves;
+    private int x;
+    private int y;
 
 }

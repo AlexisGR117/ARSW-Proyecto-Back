@@ -33,17 +33,15 @@ public class STOMPMessagesHandler {
     @MessageMapping("/newmovement.{idGame}")
     public void handleNewMovementEvent(MovementData data, @DestinationVariable int idGame) {
         String player = data.getPlayerName();
-        MovementData.Movement movement = data.getMovement();
         try {
-            paintItServices.movePlayer(idGame, player, movement.getX(), movement.getY());
-            List<Player> players = paintItServices.getAllJugadores(idGame);
-            Cell[][] cells = paintItServices.getCells(idGame);
-            msgt.convertAndSend("/topic/updatescore." + idGame, players);
-            data.setPlayers(players);
-            data.setCells(cells);
+            paintItServices.movePlayer(idGame, player, data.getX(), data.getY());
+            Game game = paintItServices.getGame(idGame);
+            data.setPlayers(game.getPlayers());
+            data.setCells(game.getCells());
+            data.setCellsWithWildcards(game.getCellsWithWildcard());
+            data.setRemainingMoves(game.getRemainingMoves());
+            data.setRemainingFrozenMoves(game.getRemainingFrozenMoves());
             msgt.convertAndSend("/topic/updateboard." + idGame, data);
-            msgt.convertAndSend("/topic/updatewildcards." + idGame, paintItServices.getCellsWithWildcard(idGame));
-            msgt.convertAndSend("/topic/updateremainingmoves." + idGame, paintItServices.getRemainingMoves(idGame));
         } catch (PaintItException e) {
             if (e.getMessage().equals(PaintItException.GAME_FINISHED)) {
                 msgt.convertAndSend("/topic/gamefinished." + idGame, paintItServices.getGame(idGame).getWinner().getName());

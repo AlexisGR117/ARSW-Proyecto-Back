@@ -123,4 +123,10 @@ public class PaintItServices {
         return 0;
     }
 
+    public int getRemainingFrozenMoves(int idGame) {
+        Game game = getGame(idGame);
+        if (game != null) return game.getRemainingFrozenMoves();
+        return 0;
+    }
+
 }
