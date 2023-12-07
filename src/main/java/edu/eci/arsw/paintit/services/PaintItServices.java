@@ -117,4 +117,10 @@ public class PaintItServices {
         paintItRepository.deleteAll();
     }
 
+    public int getRemainingMoves(int idGame) {
+        Game game = getGame(idGame);
+        if (game != null) return game.getRemainingMoves();
+        return 0;
+    }
+
 }

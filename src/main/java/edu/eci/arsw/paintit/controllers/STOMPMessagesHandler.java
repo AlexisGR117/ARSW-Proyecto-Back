@@ -43,6 +43,7 @@ public class STOMPMessagesHandler {
             data.setCells(cells);
             msgt.convertAndSend("/topic/updateboard." + idGame, data);
             msgt.convertAndSend("/topic/updatewildcards." + idGame, paintItServices.getCellsWithWildcard(idGame));
+            msgt.convertAndSend("/topic/updateremainingmoves." + idGame, paintItServices.getRemainingMoves(idGame));
         } catch (PaintItException e) {
             if (e.getMessage().equals(PaintItException.GAME_FINISHED)) {
                 msgt.convertAndSend("/topic/gamefinished." + idGame, paintItServices.getGame(idGame).getWinner().getName());
