@@ -109,7 +109,7 @@ public class PaintItServices {
 
     public double[] getGameTimes() {
         return Game.GAME_TIMES.stream()
-                .mapToDouble(Double::intValue)
+                .mapToDouble(Double::doubleValue)
                 .toArray();
     }
 
