@@ -1,6 +1,5 @@
 package edu.eci.arsw.paintit.controllers;
 
-import edu.eci.arsw.paintit.model.Game;
 import edu.eci.arsw.paintit.services.PaintItServices;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

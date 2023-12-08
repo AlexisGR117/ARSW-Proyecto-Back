@@ -2,9 +2,6 @@ package edu.eci.arsw.paintit.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 @JsonSerialize(using = WildcardSerializer.class)
 public class Freeze extends Wildcard {
 

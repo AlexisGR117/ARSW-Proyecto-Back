@@ -1,6 +1,5 @@
 package edu.eci.arsw.paintit.services;
 
-import edu.eci.arsw.paintit.model.Cell;
 import edu.eci.arsw.paintit.model.Game;
 import edu.eci.arsw.paintit.model.PaintItException;
 import edu.eci.arsw.paintit.model.Player;
@@ -15,9 +14,8 @@ import java.util.*;
 @Service
 public class PaintItServices {
 
-    PaintItRepository paintItRepository;
-
     private static final Logger logger = LoggerFactory.getLogger(PaintItServices.class);
+    PaintItRepository paintItRepository;
 
     @Autowired
     public PaintItServices(PaintItRepository paintItRepository) {
@@ -79,26 +77,8 @@ public class PaintItServices {
         paintItRepository.saveGame(game);
     }
 
-    public String getWinner(int idGame) {
-        Game game = getGame(idGame);
-        if (game != null) return game.getWinner().getName();
-        return "";
-    }
-
     public void restartGame(int idGame) {
         paintItRepository.deleteById(idGame);
-    }
-
-    public List<Cell> getCellsWithWildcard(int idGame) {
-        Game game = getGame(idGame);
-        if (game != null) return game.getCellsWithWildcard();
-        return Collections.emptyList();
-    }
-
-    public Cell[][] getCells(int idGame) {
-        Game game = getGame(idGame);
-        if (game != null) return game.getCells();
-        return new Cell[0][0];
     }
 
     public int[] getBoardSizes() {
@@ -115,18 +95,6 @@ public class PaintItServices {
 
     public void deleteAllGames() {
         paintItRepository.deleteAll();
-    }
-
-    public int getRemainingMoves(int idGame) {
-        Game game = getGame(idGame);
-        if (game != null) return game.getRemainingMoves();
-        return 0;
-    }
-
-    public int getRemainingFrozenMoves(int idGame) {
-        Game game = getGame(idGame);
-        if (game != null) return game.getRemainingFrozenMoves();
-        return 0;
     }
 
 }

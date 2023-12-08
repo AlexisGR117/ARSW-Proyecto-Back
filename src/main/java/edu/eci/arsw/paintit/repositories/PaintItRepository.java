@@ -43,7 +43,7 @@ public class PaintItRepository {
     }
 
     public void deleteById(int id) {
-        redisTemplate.opsForValue().getAndDelete(String.valueOf(id));
+        redisTemplate.delete(String.valueOf(id));
     }
 
     public void deleteAll() {
