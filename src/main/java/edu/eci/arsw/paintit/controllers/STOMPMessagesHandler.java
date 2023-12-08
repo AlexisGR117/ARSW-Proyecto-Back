@@ -26,7 +26,7 @@ public class STOMPMessagesHandler {
     }
 
     @MessageMapping("/newplayer.{idGame}")
-    public void handleNewPlayerEvent(String playerName, @DestinationVariable int idGame) {
+    public void handleNewPlayerEvent(@DestinationVariable int idGame) {
         msgt.convertAndSend("/topic/newplayer." + idGame, paintItServices.getAllJugadores(idGame));
     }
 

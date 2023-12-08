@@ -63,7 +63,6 @@ public class PaintItAPIController {
     public ResponseEntity<String> handlerPostPlayers(@PathVariable("gameCode") int gameCode, @RequestBody Player player) {
         try {
             paintiItServices.addNewPlayerToGame(gameCode, player);
-            msgt.convertAndSend("/topic/newplayer." + gameCode, paintiItServices.getAllJugadores(gameCode));
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (PaintItException e) {
             logger.error(e.getMessage(), e);
