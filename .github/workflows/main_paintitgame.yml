@@ -151,7 +151,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: 'paintitback2'
+          app-name: 'paintitback3'
           slot-name: 'Production'
           package: '*.jar'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_DD062967688F44DD9FB15E1A6BD37086 }}
