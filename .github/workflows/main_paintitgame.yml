@@ -42,7 +42,7 @@ jobs:
   PaintItBackBuild:
     name: Build and deploy to Azure Web App - paintitback
     runs-on: ubuntu-latest
-    needs: PaintItGameDeploy
+    needs: sonarcloud
     steps:
       - uses: actions/checkout@v4
       - name: Set up Java version
